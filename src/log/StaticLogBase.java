@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 /**
  * Estefan Gonzales
  * Logging class
- * This class is used to easily add a logger to any class by extending Logging.
+ * This class is used to add a logger to a static and or main() class
  */
 public class StaticLogBase {
     protected static Logger log = Logger.getLogger("StaticLogBase");
