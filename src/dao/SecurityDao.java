@@ -15,9 +15,9 @@ public class SecurityDao extends StaticLogBase {
         try (Writer writer =
                      new BufferedWriter(
                              new OutputStreamWriter(
-                                     new FileOutputStream(LOG_STORAGE_LOCATION),
+                                     new FileOutputStream(LOG_STORAGE_LOCATION, true),
                                      StandardCharsets.UTF_8))) {
-            writer.write(logRecord.toString());
+            writer.write(logRecord.toString() + "\n");
         } catch (IOException e) {
             log.severe("ERROR SAVING LOG RECORD");
             log.severe(e.getMessage());

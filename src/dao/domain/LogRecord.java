@@ -15,8 +15,7 @@ public class LogRecord {
     public String toString() {
         return  username + ',' +
                 operation + ',' +
-                dateTime + ',' +
-                '\n';
+                dateTime;
     }
 
     public String getDateTime() {
