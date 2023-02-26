@@ -1,4 +1,4 @@
-package gui;
+package gui.input;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -25,7 +25,7 @@ public class Keypad extends GridPane implements Iterable<Button>{
         setVgap(10);
     }
 
-    protected void setKeyClickHandler(String keyName, EventHandler<MouseEvent> handler) {
+    public void setKeyClickHandler(String keyName, EventHandler<MouseEvent> handler) {
         if (!keys.containsKey(keyName)) {
             System.out.println("NO KEY FOUND");
             return;

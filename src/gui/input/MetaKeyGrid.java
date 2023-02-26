@@ -1,4 +1,4 @@
-package gui;
+package gui.input;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

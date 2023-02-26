@@ -1,4 +1,8 @@
 package drivers;
 
-public class KeypadController {
+import drivers.enums.Key;
+
+public interface KeypadController {
+    void receiveKey(Key key);
+    void setInputType();
 }
