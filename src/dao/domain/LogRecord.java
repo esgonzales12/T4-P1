@@ -1,5 +1,7 @@
 package dao.domain;
 
+import java.util.Objects;
+
 public class LogRecord {
     private final String username;
     private final String operation;
@@ -15,8 +17,22 @@ public class LogRecord {
     public String toString() {
         return  username + ',' +
                 operation + ',' +
-                dateTime + ',' +
-                '\n';
+                dateTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LogRecord record = (LogRecord) o;
+        return username.equals(record.username)
+                && operation.equals(record.operation)
+                && dateTime.equals(record.dateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, operation, dateTime);
     }
 
     public String getDateTime() {
