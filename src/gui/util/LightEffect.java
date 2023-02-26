@@ -1,4 +1,4 @@
-package gui;
+package gui.util;
 
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;

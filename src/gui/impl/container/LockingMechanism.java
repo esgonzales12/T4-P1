@@ -1,22 +1,22 @@
-package gui.hardware;
+package gui.impl.container;
 
-import gui.LightEffect;
+import gui.util.LightEffect;
 import javafx.animation.TranslateTransition;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-public class LockingBolts extends Pane {
-    private static final double BOLT_WIDTH = 100;
-    private static final double BOLT_HEIGHT = 50;
-    private final Rectangle [] bolts;
-    private TranslateTransition transition;
-    boolean locked = true;
+import static gui.util.SafeUtil.*;
+
+public class LockingMechanism extends Pane {
+
+    private final TranslateTransition transition;
+    private boolean locked = true;
     private int toggle = 1;
 
-    public LockingBolts(double width, double height) {
-        bolts = new Rectangle[6];
+    public LockingMechanism(double width, double height) {
+        Rectangle[] bolts = new Rectangle[6];
         double yIncr = (height - 150) / bolts.length;
         double y = yIncr;
         for (int i = 0; i < bolts.length; i++) {
