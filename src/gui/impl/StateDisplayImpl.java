@@ -1,6 +1,6 @@
-package gui.displays.impl;
+package gui.impl;
 
-import gui.displays.StateDisplay;
+import gui.StateDisplay;
 import gui.enums.StateDisplayType;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;

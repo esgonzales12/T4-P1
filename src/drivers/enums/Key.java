@@ -1,10 +1,6 @@
 package drivers.enums;
 
 public enum Key {
-    ENTER("META"),
-    BACKSPACE("META"),
-    USER_MANAGEMENT("META"),
-    CHANGE_PASSWORD("META"),
     ONE("1"),
     TWO("2"),
     THREE("3"),
@@ -19,7 +15,11 @@ public enum Key {
     C("C"),
     D("D"),
     E("E"),
-    F("F");
+    F("F"),
+    ENTER("META"),
+    BACKSPACE("META"),
+    USER_MANAGEMENT("META"),
+    CHANGE_PASSWORD("META");
 
 
     private final String value;

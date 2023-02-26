@@ -1,4 +1,4 @@
-package gui.displays;
+package gui;
 
 public interface LedDisplay {
     void backlightOn();

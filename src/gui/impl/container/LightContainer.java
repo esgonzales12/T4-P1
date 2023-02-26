@@ -1,7 +1,9 @@
-package gui.displays;
+package gui.impl.container;
 
-import gui.displays.impl.LedDisplayImpl;
-import gui.displays.impl.StateDisplayImpl;
+import gui.LedDisplay;
+import gui.StateDisplay;
+import gui.impl.LedDisplayImpl;
+import gui.impl.StateDisplayImpl;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;

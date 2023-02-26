@@ -1,6 +1,6 @@
-package gui.displays.impl;
+package gui.impl;
 
-import gui.displays.LedDisplay;
+import gui.LedDisplay;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.scene.control.Label;

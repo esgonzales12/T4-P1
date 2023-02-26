@@ -1,4 +1,4 @@
-package gui.displays;
+package gui;
 
 import gui.enums.StateDisplayType;
 import javafx.scene.paint.Color;
