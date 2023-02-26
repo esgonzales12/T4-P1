@@ -10,3 +10,17 @@ This project designs and implements a demo for a Home Safe.
 
 
 ## Design
+
+
+
+## Persistent Storage Format
+
+## Logs
+- user, operation, dateTime (UTC or GMT)
+## UserProfiles
+- userId, password, list<authorities>\n 
+
+## Domain Objects for datalayer stuff
+- UserProfile
+- LogRecord
+- Authorities (could be an enum)

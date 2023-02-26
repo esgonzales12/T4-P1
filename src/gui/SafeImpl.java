@@ -1,5 +1,7 @@
 package gui;
 
+import drivers.KeypadController;
+
 public class SafeImpl implements Safe {
     @Override
     public void setUsbDriver() {
@@ -12,7 +14,7 @@ public class SafeImpl implements Safe {
     }
 
     @Override
-    public void setKeypadController() {
+    public void setKeypadController(KeypadController keypadController) {
 
     }
 
