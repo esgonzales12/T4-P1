@@ -1,6 +1,5 @@
 package administrator;
 
-
 import dao.SecurityDao;
 import dao.User;
 import dao.UserProfileDao;
