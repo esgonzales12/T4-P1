@@ -2,6 +2,8 @@ package drivers;
 
 import safe.SafeController;
 
+import java.util.List;
+
 public class USB {
 
     private UsbDriver driver;
@@ -70,8 +72,9 @@ public class USB {
         }
 
         @Override
-        public boolean write() {
+        public boolean write(List<String> lines) {
             // Not implemented
+            // write the lines to the file opened in createFile
             return false;
         }
 
