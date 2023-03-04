@@ -57,4 +57,17 @@ public class SecurityDao extends StaticLogBase {
         }
         return res;
     }
+    
+        public void saveLogRecord(LogRecord logRecord) {
+        save(logRecord);
+    }
+
+    public static List<LogRecord> getLogRecordsByUsername(String username) {
+        return SecurityDao.getLogRecordsByUsername(username);
+    }
+    
+    public static String stringHash(String password) {
+        return SecurityDao.stringHash(password);
+    }
+    
 }
