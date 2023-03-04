@@ -33,25 +33,21 @@ public class Authorizer {
 
     public boolean authorizeSave(User user) {
         // Check if the user has authorization to save a user profile
-        return user.getAuthorities().contains(Authorities.SAVE);
+        return user.getAuthorities().contains(Authorities.PASSWORD_MANAGEMENT);
     }
 
     public boolean authorizeDelete(String username) {
         // Check if the user has authorization to delete a user profile
         User userProfile = userProfileDao.deleteUserProfileByUsername(username);
-        return userProfile != null && userProfile.getAuthorities().contains(Authorities.DELETE);
+        return userProfile != null && userProfile.getAuthorities().contains(Authorities.CANCEL);
     }
 
     public boolean authorizeGetUser(String username) {
         // Check if the user has authorization to retrieve logs for a specific user
         User userProfile = userProfileDao.deleteUserProfileByUsername(username);
-        return userProfile != null && userProfile.getAuthorities().contains(Authorities.GET);
+        return userProfile != null && userProfile.getAuthorities().contains(Authorities.ONE. TWO. THREE);
     }
 
-    public boolean authorizeUser(User user) {
-        // Check if the user has authorization to modify a user profile
-        return user.getAuthorities().contains(Authorities.MODIFY);
-    }
 
     public void deauthorizeUser(User user) {
         // Revoke a user's authorization
