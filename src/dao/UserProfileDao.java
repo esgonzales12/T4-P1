@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UserProfileDao {
-    private Map<String, User> userMap;
-    private User rootUser;
-    private Authorizer authorizer;
+    private static Map<String, User> userMap;
+    private static User rootUser;
+    private static Authorizer authorizer;
     private AdminController adminController;
     private SecurityDao securityDao;
 
@@ -29,7 +29,7 @@ public class UserProfileDao {
     }
     
 
-    public User save(User user) {
+    public static User save(User user) {
         if (authorizer.authorizeSave(user)) {
             userMap.put(user.getUsername(), user);
             return user;
@@ -37,7 +37,7 @@ public class UserProfileDao {
         return null;
     }
 
-    public User delete(String username) {
+    public static User delete(String username) {
         if (!authorizer.authorizeDelete(username)) {
             return null;
         }
@@ -65,4 +65,19 @@ public class UserProfileDao {
     public void deauthorizeUser(User user) {
         adminController.deauthorizeUser(user);
     }
+
+
+    public void saveUserProfile(UserProfile userProfile) {
+        User user = new User(userProfile.getUsername(), userProfile.getPassword());
+        UserProfileDao.save(user);
+    }
+    
+    public User deleteUserProfileByUsername(String username) {
+        return UserProfileDao.delete(username);
+    }
+    
+    public void updateUserProfile(User user) {
+        UserProfileDao.save(user);
+    }
+    
 }
