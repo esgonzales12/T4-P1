@@ -2,6 +2,7 @@ package drivers;
 
 import safe.SafeControllerImpl;
 
+import java.io.*;
 import java.util.List;
 
 public class USB {
@@ -34,6 +35,7 @@ public class USB {
 
         private boolean connected;
         private String connectedDeviceId;
+        private FileOutputStream outputStream;
 
         public SafeUsbDriver() {
             this.connected = false;
@@ -68,14 +70,33 @@ public class USB {
 
         @Override
         public void createFile(String filename) {
-            // Not implemented
+            // handle case where file is open already
+            try {
+                outputStream = new FileOutputStream(filename);
+            } catch (FileNotFoundException e) {
+                // handle this without throwing error
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
         public boolean write(List<String> lines) {
             // Not implemented
             // write the lines to the file opened in createFile
-            return false;
+            // handle the case where outputStream is null
+            // make sure outputStream is null after writing is complete
+            try {
+                Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+                for (String str: lines) {
+                    writer.write(str + "\n");
+                }
+                writer.close();
+                outputStream.close();
+            } catch (Exception e) {
+                System.out.println("ERROR WRITING FILE");
+                return false;
+            }
+            return true;
         }
 
         public boolean isConnected() {
