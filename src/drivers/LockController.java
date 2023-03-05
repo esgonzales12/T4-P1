@@ -1,14 +1,14 @@
 package drivers;
 
 import gui.LockActuator;
-import safe.SafeController;
+import safe.SafeControllerImpl;
 
 public class LockController {
     private LockActuator actuator;
-    private SafeController safeController;
+    private SafeControllerImpl safeController;
     private boolean isLocked;
 
-    public LockController(LockActuator actuator, SafeController safeController) {
+    public LockController(LockActuator actuator, SafeControllerImpl safeController) {
         this.actuator = actuator;
         this.safeController = safeController;
         this.isLocked = true;

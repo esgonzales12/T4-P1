@@ -1,15 +1,15 @@
 package drivers;
 
-import safe.SafeController;
+import safe.SafeControllerImpl;
 
 import java.util.List;
 
 public class USB {
 
     private UsbDriver driver;
-    private SafeController controller;
+    private SafeControllerImpl controller;
 
-    public USB(UsbDriver driver, SafeController controller) {
+    public USB(UsbDriver driver, SafeControllerImpl controller) {
         this.driver = driver;
         this.controller = controller;
     }

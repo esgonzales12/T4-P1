@@ -1,11 +1,13 @@
 package drivers;
 import drivers.enums.Key;
+import safe.SafeController;
 
 import java.util.ArrayList;
 import java.util.List;
 public class KeypadControllerImpl implements KeypadController {
 
     private List<Key> inputBuffer = new ArrayList<>();
+    private SafeController safeController;
     private InputType inputType;
     /*If the user hits ENTER on the keypad then the input buffer
     * will handle A meta-key or non-meta-key depending on the input
@@ -32,8 +34,12 @@ public class KeypadControllerImpl implements KeypadController {
             inputType = InputType.REGULAR;
             inputBuffer.add(key);
         }
+        // if enter key then call
+        safeController.handleInputRequest();
     }
 
+    // specification for which input type of input is coming
+    // one arg or two, username, password, operation (delete -> D, create -> C)
     @Override
     public void setInputType() {
         inputType = InputType.META;

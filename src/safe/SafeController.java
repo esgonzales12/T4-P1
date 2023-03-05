@@ -1,4 +1,7 @@
 package safe;
 
-public class SafeController {
+public interface SafeController {
+    void handleStateChangeRequest();
+    void handleInputRequest();
+
 }
