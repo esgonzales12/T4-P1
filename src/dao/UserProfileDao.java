@@ -102,9 +102,24 @@ public class UserProfileDao extends StaticLogBase {
         }
         return null;
     }
-
-    public UserProfile getRoot() {
-        return getUser("root");
+    public UserProfile getRoot(String authority) {
+        try (BufferedReader reader
+                     = new BufferedReader(
+                             new FileReader(USER_PROFILE_PATH))){
+            String currentLine;
+            while ((currentLine = reader.readLine()) != null) {
+                String[] temp = currentLine.split(",");
+                String unm = temp[0];
+                String pass = temp[1];
+                String auth = temp[2];
+                if (auth.equals(authority)) {
+                    return new UserProfile(unm, pass, auth);
+                }
+            }
+        } catch (IOException e) {
+            log.severe("ERROR READING USER PROFILES");
+            log.severe(e.getMessage());
+        }
+        return null;
     }
-
 }
