@@ -3,7 +3,7 @@ package administrator;
 import dao.SecurityDao;
 import dao.User;
 import dao.UserProfileDao;
-import dao.domain.Authorities;
+import dao.domain.Operation;
 import dao.domain.LogRecord;
 import dao.domain.Operation;
 import dao.domain.UserProfile;
@@ -21,11 +21,11 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
 
     private static final String ALGORITHM = "AES";
     private static final String KEY = "ABC";
-    private UserProfileDao userProfileDao;
+    private static UserProfileDao userProfileDao;
     private SecurityDao securityDao;
 
 
-    public void saveUser(String username, String password, Authorities authority) {
+    public void saveUser(String username, String password, Operation authority) {
         UserProfile userProfile = new UserProfile(username, password, authority);
         userProfileDao.saveUserProfile(userProfile);
     }
@@ -34,7 +34,12 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
         userProfileDao.deleteUserProfileByUsername(username);
     }
 
-    public void authorizeUser(User user, Operation operation) {
+
+    public static void authorizeUser(User user) {
+        userProfileDao.updateUserProfile(user);
+    }
+
+    public static void deauthorizeUser(User user) {
         userProfileDao.updateUserProfile(user);
     }
 
@@ -78,4 +83,5 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
         byte[] decryptedValue = cipher.doFinal(decodedValue);
         return new String(decryptedValue);
     }
+
 }
