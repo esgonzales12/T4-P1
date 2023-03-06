@@ -118,7 +118,7 @@ public class USB {
         public void exportLogs(String filename) {
             // Allow logs to be exported via the USB connection while device is connected
             createFile(filename);
-            write();
+//            write();
         }
 
         private boolean isUsbDeviceConnected() {

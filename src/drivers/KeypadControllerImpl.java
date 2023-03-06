@@ -35,7 +35,7 @@ public class KeypadControllerImpl implements KeypadController {
             inputBuffer.add(key);
         }
         // if enter key then call
-        safeController.handleInputRequest();
+//        safeController.handleInputRequest();
     }
 
     // specification for which input type of input is coming

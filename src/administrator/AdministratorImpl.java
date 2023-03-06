@@ -1,12 +1,9 @@
 package administrator;
 
 import dao.SecurityDao;
-import dao.User;
 import dao.UserProfileDao;
+import dao.domain.*;
 import dao.domain.Operation;
-import dao.domain.LogRecord;
-import dao.domain.Operation;
-import dao.domain.UserProfile;
 import log.StaticLogBase;
 
 import javax.crypto.Cipher;
@@ -16,39 +13,59 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+
+import static dao.domain.Operation.*;
 
 public class AdministratorImpl  extends StaticLogBase implements Administrator {
 
     private static final String ALGORITHM = "AES";
-    private static final String KEY = "ABC";
-    private static UserProfileDao userProfileDao;
+    private static final Map<Authority, List<Operation>> AUTHORITY_MAP = Map.ofEntries(
+                    Map.entry(Authority.ROOT, List.of(USER_MANAGEMENT,
+                            CHANGE_PASSWORD,
+                            EXPORT_LOGS,
+                            BASE_ACCESS)),
+                    Map.entry(Authority.USER, List.of(CHANGE_PASSWORD, BASE_ACCESS))
+            );
+    private static final String KEY = "546Q6T09HCM5KAEC2RLLBD4SYUVQ9OQ2";
+    private UserProfileDao userProfileDao;
     private SecurityDao securityDao;
+    public AdministratorImpl() {
 
-
-    public void saveUser(String username, String password, Operation authority) {
-        UserProfile userProfile = new UserProfile(username, password, authority);
-        userProfileDao.saveUserProfile(userProfile);
     }
+
+
+    public void saveUser(String username, String password, Authority authority) {
+        UserProfile userProfile = new UserProfile(username, password, authority.getValue());
+//        userProfileDao.saveUserProfile(userProfile);
+    }
+
 
     public void deleteUser(String username) {
-        userProfileDao.deleteUserProfileByUsername(username);
+//        userProfileDao.deleteUserProfileByUsername(username);
+    }
+
+    @Override
+    public void authorizeUser(UserProfile user, Operation operation) {
+
     }
 
 
-    public static void authorizeUser(User user) {
-        userProfileDao.updateUserProfile(user);
-    }
 
-    public static void deauthorizeUser(User user) {
-        userProfileDao.updateUserProfile(user);
-    }
+//    public static void authorizeUser(User user) {
+//        userProfileDao.updateUserProfile(user);
+//    }
+//
+//    public static void deauthorizeUser(User user) {
+//        userProfileDao.updateUserProfile(user);
+//    }
 
     @Override
     public List<LogRecord> getLogs() {
         return null;
     }
 
-    private static String stringHash(String input) {
+    public static String stringHash(String input) {
         StringBuilder hexString = new StringBuilder();
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -67,7 +84,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
         return hexString.toString();
     }
 
-    private static String encrypt(String value) throws Exception {
+    public String encrypt(String value) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
@@ -75,7 +92,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
         return Base64.getEncoder().encodeToString(encryptedValue);
     }
 
-    private static String decrypt(String value) throws Exception {
+    public String decrypt(String value) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, keySpec);

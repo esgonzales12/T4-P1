@@ -9,7 +9,7 @@ import safe.enums.State;
 public class SafeControllerImpl implements SafeController {
     private static Administrator admin;
     private static LockController lockCont;
-    private static Authorizer auth;
+//    private static Authorizer auth;
     private State currState = State.LOCKED;
     private String userName;
     private String password;
@@ -21,7 +21,7 @@ public class SafeControllerImpl implements SafeController {
     public void SafeController(Administrator administrator, LockController lockController, Authorizer authorizer){
         admin = administrator;
         lockCont = lockController;
-        auth = authorizer;
+//        auth = authorizer;
     }
     @Override
     public boolean handleStateChangeRequest(State state) {
@@ -54,21 +54,21 @@ public class SafeControllerImpl implements SafeController {
         if(justInitialized){
             switch (currState){
                 case ADMIN:
-                    authorized = auth.isAuthorized(userName,password, Operation.USER_MANAGEMENT);
+//                    authorized = auth.isAuthorized(userName,password, Operation.USER_MANAGEMENT);
                     if(!authorized){
                         wipeUser();
                         //Flash red LED
                     }
                     break;
                 case CHANGEPWD:
-                    authorized = auth.isAuthorized(userName,password, Operation.CHANGE_PASSWORD);
+//                    authorized = auth.isAuthorized(userName,password, Operation.CHANGE_PASSWORD);
                     if(!authorized){
                         wipeUser();
                         //Flash red LED
                     }
                     break;
                 case EXPORT:
-                    authorized = auth.isAuthorized(userName,password, Operation.EXPORT_LOGS);
+//                    authorized = auth.isAuthorized(userName,password, Operation.EXPORT_LOGS);
                     if (authorized){
                         //flash green LED
                         //export logs
@@ -80,7 +80,7 @@ public class SafeControllerImpl implements SafeController {
                     }
                     break;
                 case LOCKED:
-                    authorized = auth.isAuthorized(userName,password, Operation.BASE_ACCESS);
+//                    authorized = auth.isAuthorized(userName,password, Operation.BASE_ACCESS);
                     if (authorized){
                         //flash green LED
                         lockCont.disengage();
@@ -106,7 +106,7 @@ public class SafeControllerImpl implements SafeController {
                         newPassword = input;
                     } else if(newPassword.equals(input)) {
                         //need clarification of operation system
-                        admin.saveUser(userName,newPassword,op);
+//                        admin.saveUser(userName,newPassword,op);
                     } else {
                         newPassword = null;
                         //flash red light

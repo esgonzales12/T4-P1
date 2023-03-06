@@ -1,80 +1,60 @@
 package dao;
 
 import dao.domain.UserProfile;
-import administrator.Authorizer;
-import administrator.Administrator;
-import administrator.AdministratorImpl;
+import log.StaticLogBase;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
-public class UserProfileDao {
-    private static Map<String, User> userMap;
-    private static User rootUser;
-    private static Authorizer authorizer;
-    private Administrator administrator;
-    private SecurityDao securityDao;
-
-    public UserProfileDao(Authorizer authorizer, Administrator administrator, SecurityDao securityDao) {
-        userMap = new HashMap<>();
-        rootUser = new User(UUID.randomUUID().toString(), "root", null);
-        userMap.put(rootUser.getUsername(), rootUser);
-        this.authorizer = authorizer;
-        this.administrator = administrator;
-        this.securityDao = securityDao;
+public class UserProfileDao extends StaticLogBase {
+    private static final String USER_PROFILE_PATH = "src/dao/data/userProfiles.txt";
+    public UserProfileDao() {
     }
     
 
-    public static User save(User user) {
-        if (authorizer.authorizeSave(user)) {
-            userMap.put(user.getUsername(), user);
-            return user;
+    public boolean save(UserProfile user) {
+        // Write to the userProfiles.txt file
+        // 1. Open the txt file
+        // 2. Search for the user (if they exist)
+        // 3. If exists update, and write it back to the file
+        try (Writer writer =
+                     new BufferedWriter(
+                             new OutputStreamWriter(
+                                     new FileOutputStream(USER_PROFILE_PATH, true),
+                                     StandardCharsets.UTF_8))) {
+            writer.write(user.toString() + "\n");
+        } catch (IOException e) {
+            log.severe("ERROR SAVING LOG RECORD");
+            log.severe(e.getMessage());
+            return false;
         }
+        return true;
+    }
+
+    public boolean delete(String username) {
+        // Need to verify the user is not the root user
+        // Remove a line from the text file, if we can do that return true
+//        if (!authorizer.authorizeDelete(username)) {
+////            return null;
+//        }
+//        if (username.equals(rootUser.getUsername())) {
+////            return null;
+//        }
+//        return userMap.remove(username);/
+        return false;
+    }
+
+    public UserProfile getUser(String username) {
+        // Looks for the username in the text file then builds it (User object) if exists
+//        if (!authorizer.authorizeGetUser(username)) {
+//            return null;
+//        }
+//        return userMap.get(username);
         return null;
     }
 
-    public static User delete(String username) {
-        if (!authorizer.authorizeDelete(username)) {
-            return null;
-        }
-        if (username.equals(rootUser.getUsername())) {
-            return null;
-        }
-        return userMap.remove(username);
+    public UserProfile getRoot() {
+        return null;
     }
 
-    public User getUser(String username) {
-        if (!authorizer.authorizeGetUser(username)) {
-            return null;
-        }
-        return userMap.get(username);
-    }
-
-    public User getRoot() {
-        return rootUser;
-    }
-
-    public void authorizeUser(User user) {
-        AdministratorImpl.authorizeUser(user);
-    }
-
-    public void deauthorizeUser(User user) {
-        AdministratorImpl.deauthorizeUser(user);
-    }
-
-
-    public void saveUserProfile(UserProfile userProfile) {
-        User user = new User(userProfile.getUsername(), userProfile.getPassword(), null);
-        UserProfileDao.save(user);
-    }
-    
-    public User deleteUserProfileByUsername(String username) {
-        return UserProfileDao.delete(username);
-    }
-    
-    public void updateUserProfile(User user) {
-        UserProfileDao.save(user);
-    }
-    
 }
