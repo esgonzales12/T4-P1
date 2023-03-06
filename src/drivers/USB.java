@@ -71,6 +71,14 @@ public class USB {
         @Override
         public void createFile(String filename) {
             // handle case where file is open already
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    System.out.println("Error: closing existing file");
+                }
+            }
+
             try {
                 outputStream = new FileOutputStream(filename);
             } catch (FileNotFoundException e) {
@@ -81,10 +89,13 @@ public class USB {
 
         @Override
         public boolean write(List<String> lines) {
-            // Not implemented
             // write the lines to the file opened in createFile
             // handle the case where outputStream is null
-            // make sure outputStream is null after writing is complete
+            if (outputStream == null) {
+                System.out.println("ERROR: outputStream is null");
+                return false;
+            }
+
             try {
                 Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream));
                 for (String str: lines) {
@@ -92,6 +103,7 @@ public class USB {
                 }
                 writer.close();
                 outputStream.close();
+                outputStream = null;  // make sure outputStream is null after writing is complete
             } catch (Exception e) {
                 System.out.println("ERROR WRITING FILE");
                 return false;
