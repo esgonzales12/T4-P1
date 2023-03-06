@@ -8,6 +8,7 @@ public enum Operation {
     CANCEL;
 
     public boolean contains(Operation operation) {
+        // Check if an operation exists in the Operation enum
         for (Operation op : Operation.values()) {
             if (op.equals(operation)) {
                 return true;
