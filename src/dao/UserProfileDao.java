@@ -1,14 +1,11 @@
 package dao;
 
-import dao.SecurityDao;
-import dao.domain.LogRecord;
 import dao.domain.UserProfile;
 import administrator.Authorizer;
-import administrator.AdminController;
-
+import administrator.Administrator;
+import administrator.AdministratorImpl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,15 +13,15 @@ public class UserProfileDao {
     private static Map<String, User> userMap;
     private static User rootUser;
     private static Authorizer authorizer;
-    private AdminController adminController;
+    private Administrator administrator;
     private SecurityDao securityDao;
 
-    public UserProfileDao(Authorizer authorizer, AdminController adminController, SecurityDao securityDao) {
+    public UserProfileDao(Authorizer authorizer, Administrator administrator, SecurityDao securityDao) {
         userMap = new HashMap<>();
-        rootUser = new User(UUID.randomUUID().toString(), "root");
+        rootUser = new User(UUID.randomUUID().toString(), "root", null);
         userMap.put(rootUser.getUsername(), rootUser);
         this.authorizer = authorizer;
-        this.adminController = adminController;
+        this.administrator = administrator;
         this.securityDao = securityDao;
     }
     
@@ -59,16 +56,16 @@ public class UserProfileDao {
     }
 
     public void authorizeUser(User user) {
-        adminController.authorizeUser(user);
+        AdministratorImpl.authorizeUser(user);
     }
 
     public void deauthorizeUser(User user) {
-        adminController.deauthorizeUser(user);
+        AdministratorImpl.deauthorizeUser(user);
     }
 
 
     public void saveUserProfile(UserProfile userProfile) {
-        User user = new User(userProfile.getUsername(), userProfile.getPassword());
+        User user = new User(userProfile.getUsername(), userProfile.getPassword(), null);
         UserProfileDao.save(user);
     }
     
