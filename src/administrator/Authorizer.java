@@ -3,7 +3,7 @@ package administrator;
 import dao.SecurityDao;
 import dao.User;
 import dao.UserProfileDao;
-import dao.domain.Authorities;
+import dao.domain.Operation;
 import dao.domain.LogRecord;
 import dao.domain.UserProfile;
 
@@ -16,12 +16,12 @@ public class Authorizer {
     private final SecurityDao securityDao;
     private final UserProfileDao userProfileDao;
 
-    public Authorizer(SecurityDao securityDao, UserProfileDao userProfileDao) {
-        this.securityDao = securityDao;
-        this.userProfileDao = userProfileDao;
+    public Authorizer(SecurityDao adminUsername, UserProfileDao adminPassword) {
+        this.securityDao = adminUsername;
+        this.userProfileDao = adminPassword;
     }
 
-    public boolean isAuthorized(String username, String password, Authorities authority) {
+    public boolean isAuthorized(String username, String password, Operation authority) {
         // Verify that the username and password are correct
         User userProfile = userProfileDao.deleteUserProfileByUsername(username);
         if (userProfile == null || !userProfile.getPassword().equals(securityDao.stringHash(password))) {
@@ -33,19 +33,19 @@ public class Authorizer {
 
     public boolean authorizeSave(User user) {
         // Check if the user has authorization to save a user profile
-        return user.getAuthorities().contains(Authorities.PASSWORD_MANAGEMENT);
+        return user.getAuthorities().contains(Operation.USER_MANAGEMENT);
     }
 
     public boolean authorizeDelete(String username) {
         // Check if the user has authorization to delete a user profile
         User userProfile = userProfileDao.deleteUserProfileByUsername(username);
-        return userProfile != null && userProfile.getAuthorities().contains(Authorities.CANCEL);
+        return userProfile != null && userProfile.getAuthorities().contains(Operation.USER_MANAGEMENT);
     }
 
     public boolean authorizeGetUser(String username) {
         // Check if the user has authorization to retrieve logs for a specific user
         User userProfile = userProfileDao.deleteUserProfileByUsername(username);
-        return userProfile != null && userProfile.getAuthorities().contains(Authorities.ONE. TWO. THREE);
+        return userProfile != null && userProfile.getAuthorities().contains(Operation.USER_MANAGEMENT);
     }
 
 
