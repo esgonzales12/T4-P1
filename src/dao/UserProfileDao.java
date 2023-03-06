@@ -104,7 +104,7 @@ public class UserProfileDao extends StaticLogBase {
     }
 
     public UserProfile getRoot() {
-        return null;
+        return getUser("root");
     }
 
 }
