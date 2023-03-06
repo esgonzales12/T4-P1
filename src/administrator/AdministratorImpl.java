@@ -3,24 +3,23 @@ package administrator;
 import dao.SecurityDao;
 import dao.UserProfileDao;
 import dao.domain.*;
-import dao.domain.Operation;
 import log.StaticLogBase;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 import static dao.domain.Operation.*;
 import static java.lang.String.format;
-import static java.util.Objects.*;
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 public class AdministratorImpl  extends StaticLogBase implements Administrator {
 
@@ -45,7 +44,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     public boolean saveUser(String username, String password, Authority authority) {
         try {
             if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
-            UserProfile existing = userProfileDao.getUser(Objects.requireNonNull(encrypt(username)));
+            UserProfile existing = userProfileDao.getUser(requireNonNull(encrypt(username)));
 
             if (isNull(password)) {
                 log.info("PW REQUIRED FOR CREATE OR UPDATE");
@@ -67,7 +66,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             }
 
             // changing password
-            log.info("CHANGING ROOT USER PASSWORD");
+            log.info("CHANGING USER PASSWORD");
 
             return userProfileDao.save(new UserProfile(
                     existing.getUsername(),
@@ -92,7 +91,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
 
             String rootAuthority = requireNonNull(encrypt(Authority.ROOT.getValue()));
-            UserProfile root = userProfileDao.getRoot();
+            UserProfile root = userProfileDao.getRoot(rootAuthority);
             String rootUsername = requireNonNull(decrypt(root.getUsername()));
             if  (rootUsername.equals(username)) {
                 log.info("UNABLE TO DECRYPT OR ATTEMPTED TO DELETE ROOT USER");
@@ -121,22 +120,22 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             }
 
             String encryptedUsername = requireNonNull(encrypt(user.getUsername()));
-            UserProfile searchResult = userProfileDao.getUser(encryptedUsername);
+            UserProfile storedUser = userProfileDao.getUser(encryptedUsername);
 
-            if (isNull(searchResult)) {
+            if (isNull(storedUser)) {
                 log.info("NO USER FOUND WITH USERNAME: " + user.getUsername());
                 return Authorization.UNAUTHORIZED;
             }
 
             String givenPassword = requireNonNull(hash(user.getPassword()));
-            String requiredPassword = searchResult.getPassword();
+            String requiredPassword = storedUser.getPassword();
 
             if (!givenPassword.equals(requiredPassword)) {
                 log.info("INVALID PASSWORD FOR USER: " + user.getUsername());
                 return Authorization.UNAUTHORIZED;
             }
 
-            String userAuthority = requireNonNull(decrypt(user.getAuthorities()));
+            String userAuthority = requireNonNull(decrypt(storedUser.getAuthorities()));
             Authority authority = null;
             for (Authority auth: Authority.values()) {
                 if (userAuthority.equals(auth.getValue())) {
@@ -151,7 +150,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             }
 
             boolean logged = securityDao.save(new LogRecord.Builder()
-                    .setUsername(searchResult.getUsername())
+                    .setUsername(storedUser.getUsername())
                     .setOperation(requireNonNull(encrypt(operation.toString())))
                     .setDateTime(requireNonNull(encrypt(String.valueOf(Instant.now()))))
                     .build());
@@ -230,9 +229,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             encryptedValue = cipher.doFinal(value.getBytes());
-        } catch (IllegalBlockSizeException | NoSuchPaddingException |
-                 NoSuchAlgorithmException | BadPaddingException |
-                 InvalidKeyException e) {
+        } catch (Exception e) {
             log.warning("UNABLE TO ENCRYPT");
             log.info(e.getMessage());
             return null;
@@ -248,9 +245,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
             byte[] decodedValue = Base64.getDecoder().decode(value);
             decryptedValue = cipher.doFinal(decodedValue);
-        } catch (IllegalBlockSizeException | BadPaddingException |
-                 NoSuchPaddingException | NoSuchAlgorithmException |
-                 InvalidKeyException e) {
+        } catch (Exception e) {
             log.warning("UNABLE TO DECRYPT");
             log.info(e.getMessage());
             return null;

@@ -1,15 +1,12 @@
 package safe;
 
 import administrator.Administrator;
-import administrator.Authorizer;
-import dao.domain.Operation;
 import drivers.LockController;
 import safe.enums.State;
 
 public class SafeControllerImpl implements SafeController {
     private static Administrator admin;
     private static LockController lockCont;
-//    private static Authorizer auth;
     private State currState = State.LOCKED;
     private String userName;
     private String password;
@@ -18,10 +15,9 @@ public class SafeControllerImpl implements SafeController {
     private boolean authorized = false;
 
     //need to add display stuff
-    public void SafeController(Administrator administrator, LockController lockController, Authorizer authorizer){
+    public void SafeController(Administrator administrator, LockController lockController){
         admin = administrator;
         lockCont = lockController;
-//        auth = authorizer;
     }
     @Override
     public boolean handleStateChangeRequest(State state) {
