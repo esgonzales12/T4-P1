@@ -1,11 +1,11 @@
 package dao.domain;
 
-import java.util.List;
+import java.util.Objects;
 
 public class UserProfile {
-    private String username;
-    private String password;
-    private String authority;
+    private final String username;
+    private final String password;
+    private final String authority;
 
     public UserProfile(String username, String password, String authority) {
         this.username = username;
