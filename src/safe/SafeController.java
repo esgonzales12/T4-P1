@@ -1,7 +1,9 @@
 package safe;
 
+import safe.enums.State;
+
 public interface SafeController {
-    void handleStateChangeRequest();
-    void handleInputRequest();
+    boolean handleStateChangeRequest(State state);
+    void handleInputRequest(String input);
 
 }
