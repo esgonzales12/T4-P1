@@ -10,4 +10,5 @@ public interface Administrator {
     boolean deleteUser(String username);
     Authorization authorizeUser(UserProfile user, Operation operation);
     List<LogRecord> getLogs();
+    UserProfile getUserPrincipal();
 }

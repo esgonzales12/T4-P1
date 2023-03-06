@@ -15,12 +15,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 
 import static dao.domain.Operation.*;
-import static java.util.Objects.isNull;
+import static java.lang.String.format;
+import static java.util.Objects.*;
 
 public class AdministratorImpl  extends StaticLogBase implements Administrator {
 
@@ -28,70 +28,179 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     private static final Map<Authority, List<Operation>> ALLOWED_OPERATIONS = Map.ofEntries(
                     Map.entry(Authority.ROOT, List.of(USER_MANAGEMENT, CHANGE_PASSWORD, EXPORT_LOGS, BASE_ACCESS)),
                     Map.entry(Authority.USER, List.of(CHANGE_PASSWORD, BASE_ACCESS)));
-    private static final String KEY = "546Q6T09HCM5KAEC2RLLBD4SYUVQ9OQ2";
     private final UserProfileDao userProfileDao;
     private final SecurityDao securityDao;
+    private UserProfile userPrincipal;
+    private String encryptionKey;
+
     public AdministratorImpl() {
         userProfileDao = new UserProfileDao();
         securityDao = new SecurityDao();
+        encryptionKey = securityDao.getEncryptionKey();
+        userPrincipal = null;
     }
 
 
     @Override
     public boolean saveUser(String username, String password, Authority authority) {
-        UserProfile userProfile;
         try {
-            userProfile = new UserProfile(
-                    encrypt(username),
-                    hash(password),
-                    encrypt(authority.getValue()));
-        } catch (NullPointerException e) {
-            log.warning("UNABLE TO SAVE USER PROFILE");
+            if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
+            UserProfile existing = userProfileDao.getUser(Objects.requireNonNull(encrypt(username)));
+
+            if (isNull(password)) {
+                log.info("PW REQUIRED FOR CREATE OR UPDATE");
+                return false;
+            }
+
+            // creating a new user
+            else if (isNull(existing)) {
+                int currentUsers = userProfileDao.countNumber();
+                if (currentUsers >= 10) {
+                    log.info("UNABLE TO CREATE MORE THAN 10 USER PROFILES");
+                    return false;
+                }
+                UserProfile userProfile = new UserProfile(
+                        requireNonNull(encrypt(username)),
+                        requireNonNull(hash(password)),
+                        requireNonNull(encrypt(authority.getValue())));
+                return userProfileDao.save(userProfile);
+            }
+
+            // changing password
+            log.info("CHANGING ROOT USER PASSWORD");
+
+            return userProfileDao.save(new UserProfile(
+                    existing.getUsername(),
+                    requireNonNull(hash(password)),
+                    existing.getAuthorities()));
+
+        } catch (NullPointerException nullPointerException) {
+            // handles null cases for encrypt, decrypt, hash
+            log.warning("NULL POINTER IN SAVE");
+            log.warning(nullPointerException.getMessage());
+        } catch (Exception e) {
+            log.warning("UNEXPECTED EXCEPTION ON SAVE");
             log.warning(e.getMessage());
-            return false;
         }
-        return userProfileDao.save(userProfile);
+        return false;
     }
 
 
     @Override
     public boolean deleteUser(String username) {
-        String encryptedRootAuthority = encrypt(Authority.ROOT.getValue());
-        UserProfile root = userProfileDao.getRoot();
-        String rootUsername = decrypt(root.getUsername());
-        if  (isNull(rootUsername) || rootUsername.equals(username)) {
-            log.info("UNABLE TO DECRYPT OR ATTEMPTED TO DELETE ROOT USER");
-            return false;
+        try {
+            if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
+
+            String rootAuthority = requireNonNull(encrypt(Authority.ROOT.getValue()));
+            UserProfile root = userProfileDao.getRoot();
+            String rootUsername = requireNonNull(decrypt(root.getUsername()));
+            if  (rootUsername.equals(username)) {
+                log.info("UNABLE TO DECRYPT OR ATTEMPTED TO DELETE ROOT USER");
+                return false;
+            }
+            return userProfileDao.delete(username);
+        } catch (NullPointerException nullPointerException) {
+            // handles null cases for encrypt, decrypt, hash
+            log.warning("NULL POINTER IN AUTHORIZE");
+            log.warning(nullPointerException.getMessage());
+        } catch (Exception e) {
+            log.warning("UNEXPECTED EXCEPTION ON DELETE");
+            log.warning(e.getMessage());
         }
-        return userProfileDao.delete(username);
+        return false;
     }
 
     @Override
     public Authorization authorizeUser(UserProfile user, Operation operation) {
-        String encryptedUsername = encrypt(user.getUsername());
-        if (isNull(encryptedUsername)) {
-            log.warning("ERROR ENCRYPTING USERNAME");
-            return Authorization.UNAUTHORIZED;
-        }
+        try {
+            if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
 
-        UserProfile searchResult = userProfileDao.getUser(encryptedUsername);
-        if (isNull(searchResult)) return Authorization.UNAUTHORIZED;
-
-        String authorityValue = decrypt(user.getAuthorities());
-        if
-
-        for (Authority authority: Authority.values()) {
-            if (authorityValue.equals(authority.getValue())) {
-                return ALLOWED_OPERATIONS.get(authority).contains(operation) ?
-                Authorization.AUTHORIZED : Authorization.UNAUTHORIZED;
+            if (isNull(user.getUsername()) || isNull(user.getPassword())) {
+                log.info("USERNAME AND PASSWORD REQUIRED FOR AUTHORIZE");
+                return Authorization.UNAUTHORIZED;
             }
+
+            String encryptedUsername = requireNonNull(encrypt(user.getUsername()));
+            UserProfile searchResult = userProfileDao.getUser(encryptedUsername);
+
+            if (isNull(searchResult)) {
+                log.info("NO USER FOUND WITH USERNAME: " + user.getUsername());
+                return Authorization.UNAUTHORIZED;
+            }
+
+            String givenPassword = requireNonNull(hash(user.getPassword()));
+            String requiredPassword = searchResult.getPassword();
+
+            if (!givenPassword.equals(requiredPassword)) {
+                log.info("INVALID PASSWORD FOR USER: " + user.getUsername());
+                return Authorization.UNAUTHORIZED;
+            }
+
+            String userAuthority = requireNonNull(decrypt(user.getAuthorities()));
+            Authority authority = null;
+            for (Authority auth: Authority.values()) {
+                if (userAuthority.equals(auth.getValue())) {
+                    authority = auth;
+                    break;
+                }
+            }
+
+            if (isNull(authority) || !ALLOWED_OPERATIONS.get(authority).contains(operation)) {
+                log.info(format("USER %s WITH AUTHORITY %s CANNOT PERFORM OPERATION %s", user.getUsername(), authority, operation));
+                return Authorization.UNAUTHORIZED;
+            }
+
+            boolean logged = securityDao.save(new LogRecord.Builder()
+                    .setUsername(searchResult.getUsername())
+                    .setOperation(requireNonNull(encrypt(operation.toString())))
+                    .setDateTime(requireNonNull(encrypt(String.valueOf(Instant.now()))))
+                    .build());
+
+            if (logged) {
+                userPrincipal = user;
+                return Authorization.AUTHORIZED;
+            }
+
+            log.warning(format("UNABLE TO LOG AUTHORIZATION: %s FOR OPERATION %s", user.getUsername(), operation));
+            return Authorization.UNAUTHORIZED;
+
+        } catch (NullPointerException nullPointerException) {
+            log.warning("NULL POINTER IN AUTHORIZE");
+            log.warning(nullPointerException.getMessage());
+        } catch (Exception e) {
+            log.warning("UNEXPECTED EXCEPTION ON AUTHORIZE");
+            log.warning(e.getMessage());
         }
         return Authorization.UNAUTHORIZED;
     }
 
     @Override
     public List<LogRecord> getLogs() {
-        return securityDao.getRecords();
+        List<LogRecord> result = new ArrayList<>();
+        List<LogRecord> encryptedRecords = securityDao.getRecords();
+        try {
+            if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
+
+            for (LogRecord record: encryptedRecords) {
+                result.add(new LogRecord.Builder()
+                        .setUsername(requireNonNull(decrypt(record.getUsername())))
+                        .setDateTime(requireNonNull(decrypt(record.getDateTime())))
+                        .setOperation(requireNonNull(decrypt(record.getOperation())))
+                        .build());
+            }
+        } catch (NullPointerException nullPointerException) {
+            log.warning("NULL POINTER IN GET LOGS");
+            log.warning(nullPointerException.getMessage());
+        } catch (Exception e) {
+            log.warning("UNEXPECTED EXCEPTION IN GET LOGS");
+            log.warning(e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public UserProfile getUserPrincipal() {
+        return userPrincipal;
     }
 
     public String hash(String input) {
@@ -117,7 +226,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     public String encrypt(String value) {
         byte[] encryptedValue;
         try {
-            SecretKeySpec keySpec = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+            SecretKeySpec keySpec = new SecretKeySpec(encryptionKey.getBytes(), ALGORITHM);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             encryptedValue = cipher.doFinal(value.getBytes());
@@ -134,7 +243,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     public String decrypt(String value) {
         byte[] decryptedValue;
         try {
-            SecretKeySpec keySpec = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+            SecretKeySpec keySpec = new SecretKeySpec(encryptionKey.getBytes(), ALGORITHM);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
             byte[] decodedValue = Base64.getDecoder().decode(value);

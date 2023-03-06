@@ -11,7 +11,8 @@ import java.util.List;
 public class SecurityDao extends StaticLogBase {
     private static final String LOG_STORAGE_LOCATION = "src/dao/data/logRecords.txt";
     private static final String ENCRYPTION_KEY_STORAGE_LOCATION = "src/dao/data/encryptionKey.txt";
-    public void save(LogRecord logRecord) {
+
+    public boolean save(LogRecord logRecord) {
         try (Writer writer =
                      new BufferedWriter(
                              new OutputStreamWriter(
@@ -21,7 +22,9 @@ public class SecurityDao extends StaticLogBase {
         } catch (IOException e) {
             log.severe("ERROR SAVING LOG RECORD");
             log.severe(e.getMessage());
+            return false;
         }
+        return true;
     }
 
     public List<LogRecord> getRecords() {
@@ -56,18 +59,6 @@ public class SecurityDao extends StaticLogBase {
             log.severe(e.getMessage());
         }
         return res;
-    }
-    
-        public void saveLogRecord(LogRecord logRecord) {
-        save(logRecord);
-    }
-
-    public static List<LogRecord> getLogRecordsByUsername(String username) {
-        return SecurityDao.getLogRecordsByUsername(username);
-    }
-    
-    public static String stringHash(String password) {
-        return SecurityDao.stringHash(password);
     }
     
 }
