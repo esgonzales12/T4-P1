@@ -8,7 +8,18 @@ public class KeypadControllerImpl implements KeypadController {
 
     private List<Key> inputBuffer = new ArrayList<>();
     private SafeController safeController;
+    private DisplayController displayController;
     private InputType inputType;
+
+    public KeypadControllerImpl(SafeController safeController, DisplayController displayController){
+        this.safeController = safeController;
+        this.displayController = displayController;
+    }
+
+    public KeypadControllerImpl() {
+
+    }
+
     /*If the user hits ENTER on the keypad then the input buffer
     * will handle A meta-key or non-meta-key depending on the input
     * BACKSPACE key removes the last character from the input buffer.
@@ -30,12 +41,13 @@ public class KeypadControllerImpl implements KeypadController {
             inputType = InputType.META;
             inputBuffer.clear();
             inputBuffer.add(key);
+
         } else {
             inputType = InputType.REGULAR;
             inputBuffer.add(key);
         }
-        // if enter key then call
-//        safeController.handleInputRequest();
+        // Update the display with the current input buffer
+
     }
 
     // specification for which input type of input is coming
@@ -61,6 +73,7 @@ public class KeypadControllerImpl implements KeypadController {
         }
         String input = stringBuilder.toString();
         // Send input to SafeController
+        safeController.handleInputRequest(input);
     }
 
     private enum InputType {

@@ -1,5 +1,6 @@
 package gui;
 
+import drivers.DisplayController;
 import drivers.KeypadControllerImpl;
 import drivers.LockController;
 import gui.impl.LockActuatorImpl;
@@ -19,6 +20,8 @@ public class Demo extends Application {
         Safe safe = new SafeImpl(windowWidth, windowHeight);
         SafeController safeController = new SafeControllerImpl();
         safe.setKeypadController(new KeypadControllerImpl());
+
+
 
         LockActuator actuator = new LockActuatorImpl();
 //        LockController lockController = new LockController();
