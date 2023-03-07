@@ -10,8 +10,9 @@ public class DispController implements DisplayControllerInt {
     private LedDisplay ledDisplay;
     private StateDisplay stateDisplay;
 
-    public DispController() {
-
+    public DispController(LedDisplay ledDisplay, StateDisplay stateDisplay) {
+        this.ledDisplay = ledDisplay;
+        this.stateDisplay = stateDisplay;
     }
 
     @Override
@@ -21,21 +22,23 @@ public class DispController implements DisplayControllerInt {
 
     @Override
     public void clear() {
-
+        stateDisplay.off();
+        ledDisplay.clearDisplayText();
     }
 
     @Override
     public void sleep() {
-
+        stateDisplay.off();
+        ledDisplay.backlightOff();
     }
 
     @Override
     public void displayInput(String input) {
-
+        ledDisplay.setDisplayText("Input:", input);
     }
 
     @Override
     public void displayPrompt(String prompt) {
-
+        ledDisplay.setDisplayText("Prompt:", prompt);
     }
 }

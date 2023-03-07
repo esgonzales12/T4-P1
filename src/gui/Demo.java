@@ -1,10 +1,10 @@
 package gui;
 
-import drivers.DisplayController;
-import drivers.KeypadControllerImpl;
-import drivers.LockController;
+import drivers.*;
+import gui.impl.LedDisplayImpl;
 import gui.impl.LockActuatorImpl;
 import gui.impl.SafeImpl;
+import gui.impl.StateDisplayImpl;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -17,6 +17,10 @@ public class Demo extends Application {
     public void start(Stage primaryStage) {
         final double windowWidth = 1200;
         final double windowHeight = 850;
+
+
+
+
         Safe safe = new SafeImpl(windowWidth, windowHeight);
         SafeController safeController = new SafeControllerImpl();
         safe.setKeypadController(new KeypadControllerImpl());
@@ -24,7 +28,8 @@ public class Demo extends Application {
 
 
         LockActuator actuator = new LockActuatorImpl();
-//        LockController lockController = new LockController();
+
+      //  LockController lockController = new LockController();
 
 
 
