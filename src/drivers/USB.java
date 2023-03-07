@@ -1,6 +1,8 @@
 package drivers;
 
+import safe.SafeController;
 import safe.SafeControllerImpl;
+import safe.enums.State;
 
 import java.io.*;
 import java.util.List;
@@ -8,9 +10,9 @@ import java.util.List;
 public class USB {
 
     private UsbDriver driver;
-    private SafeControllerImpl controller;
+    private static SafeController controller;
 
-    public USB(UsbDriver driver, SafeControllerImpl controller) {
+    public USB(UsbDriver driver, SafeController controller) {
         this.driver = driver;
         this.controller = controller;
     }
@@ -31,7 +33,7 @@ public class USB {
     }
 
     // Inner class implementing UsbDriver interface
-    private class SafeUsbDriver implements UsbDriver {
+    public static class SafeUsbDriver implements UsbDriver {
 
         private boolean connected;
         private String connectedDeviceId;
@@ -50,7 +52,7 @@ public class USB {
                 String deviceId = getConnectedDeviceId();
 
                 // Send signal to SafeController
-               // controller.usbDeviceConnected(deviceId);
+                controller.handleStateChangeRequest(State.EXPORT);
 
                 // Set connected flag and device ID
                 this.connected = true;

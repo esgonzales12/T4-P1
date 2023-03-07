@@ -1,16 +1,17 @@
 package drivers;
 
 import gui.LockActuator;
+import safe.SafeController;
 import safe.SafeControllerImpl;
 
 
 public class LockController {
     private LockActuator actuator;
-    private SafeControllerImpl safeController;
+    private SafeController safeController;
 
-    public LockController(LockActuator actuator) {
+    public LockController(LockActuator actuator, SafeController safeController) {
         this.actuator = actuator;
-        this.safeController = new SafeControllerImpl();
+        this.safeController = safeController;
     }
 
     public void disengage() {
