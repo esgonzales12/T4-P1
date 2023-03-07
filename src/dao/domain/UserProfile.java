@@ -1,7 +1,5 @@
 package dao.domain;
 
-import java.util.Objects;
-
 public class UserProfile {
     private final String username;
     private final String password;
@@ -21,7 +19,7 @@ public class UserProfile {
         return password;
     }
 
-    public String getAuthorities() {
+    public String getAuthority() {
         return authority;
     }
 

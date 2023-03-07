@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import static dao.domain.Authority.ROOT;
 import static dao.domain.Operation.*;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -25,7 +26,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
 
     private static final String ALGORITHM = "AES";
     private static final Map<Authority, List<Operation>> ALLOWED_OPERATIONS = Map.ofEntries(
-                    Map.entry(Authority.ROOT, List.of(USER_MANAGEMENT, CHANGE_PASSWORD, EXPORT_LOGS, BASE_ACCESS)),
+                    Map.entry(ROOT, List.of(USER_MANAGEMENT, CHANGE_PASSWORD, EXPORT_LOGS, BASE_ACCESS)),
                     Map.entry(Authority.USER, List.of(CHANGE_PASSWORD, BASE_ACCESS)));
     private final UserProfileDao userProfileDao;
     private final SecurityDao securityDao;
@@ -43,21 +44,31 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     @Override
     public boolean saveUser(String username, String password, Authority authority) {
         try {
+            if (isNull(password) || isNull(username)) {
+                log.info("USERNAME AND PASSWORD REQUIRED FOR CREATE OR UPDATE");
+                return false;
+            }
+
             if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
+
             UserProfile existing = userProfileDao.getUser(requireNonNull(encrypt(username)));
 
-            if (isNull(password)) {
-                log.info("PW REQUIRED FOR CREATE OR UPDATE");
+            // creating a new user, no authority given
+            if (isNull(existing) && isNull(authority)) {
+                log.info("AUTHORITY REQUIRED TO CREATE NEW USER");
                 return false;
             }
 
             // creating a new user
             else if (isNull(existing)) {
                 int currentUsers = userProfileDao.countNumber();
-                if (currentUsers >= 10) {
-                    log.info("UNABLE TO CREATE MORE THAN 10 USER PROFILES");
+                if (currentUsers >= 10 || (currentUsers != 0 && authority == ROOT)) {
+                    log.info(currentUsers >= 10 ?
+                            "UNABLE TO CREATE MORE THAN 10 USER PROFILES"
+                            : "ATTEMPTED TO CREATE SECOND ROOT USER");
                     return false;
                 }
+                log.info("CREATING NEW USER");
                 UserProfile userProfile = new UserProfile(
                         requireNonNull(encrypt(username)),
                         requireNonNull(hash(password)),
@@ -71,7 +82,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             return userProfileDao.save(new UserProfile(
                     existing.getUsername(),
                     requireNonNull(hash(password)),
-                    existing.getAuthorities()));
+                    existing.getAuthority()));
 
         } catch (NullPointerException nullPointerException) {
             // handles null cases for encrypt, decrypt, hash
@@ -90,14 +101,14 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
         try {
             if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
 
-            String rootAuthority = requireNonNull(encrypt(Authority.ROOT.getValue()));
+            String rootAuthority = requireNonNull(encrypt(ROOT.getValue()));
             UserProfile root = userProfileDao.getRoot(rootAuthority);
             String rootUsername = requireNonNull(decrypt(root.getUsername()));
             if  (rootUsername.equals(username)) {
-                log.info("UNABLE TO DECRYPT OR ATTEMPTED TO DELETE ROOT USER");
+                log.info("ATTEMPTED TO DELETE ROOT USER");
                 return false;
             }
-            return userProfileDao.delete(username);
+            return userProfileDao.delete(requireNonNull(encrypt(username)));
         } catch (NullPointerException nullPointerException) {
             // handles null cases for encrypt, decrypt, hash
             log.warning("NULL POINTER IN AUTHORIZE");
@@ -135,7 +146,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
                 return Authorization.UNAUTHORIZED;
             }
 
-            String userAuthority = requireNonNull(decrypt(storedUser.getAuthorities()));
+            String userAuthority = requireNonNull(decrypt(storedUser.getAuthority()));
             Authority authority = null;
             for (Authority auth: Authority.values()) {
                 if (userAuthority.equals(auth.getValue())) {
@@ -231,7 +242,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             encryptedValue = cipher.doFinal(value.getBytes());
         } catch (Exception e) {
             log.warning("UNABLE TO ENCRYPT");
-            log.info(e.getMessage());
+            log.warning(e.getMessage());
             return null;
         }
         return Base64.getEncoder().encodeToString(encryptedValue);
@@ -247,7 +258,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             decryptedValue = cipher.doFinal(decodedValue);
         } catch (Exception e) {
             log.warning("UNABLE TO DECRYPT");
-            log.info(e.getMessage());
+            log.warning(e.getMessage());
             return null;
         }
         return new String(decryptedValue);

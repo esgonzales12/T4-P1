@@ -31,56 +31,41 @@ public class UserProfileDao extends StaticLogBase {
         // 1. Open the txt file
         // 2. Search for the user (if they exist)
         // 3. If exists update, and write it back to the file
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(USER_PROFILE_PATH, true),
-                StandardCharsets.UTF_8))) {
-            // Search for the user (if they exist)
-            boolean userExists = false;
+
+        UserProfile profile = getUser(user.getUsername());
+        boolean userExists = profile != null;
+        // If exists update, and write it back to the file
+        if(userExists) {
             try (BufferedReader reader = new BufferedReader(new FileReader(USER_PROFILE_PATH))) {
                 String currentLine;
+                StringBuilder fileContent = new StringBuilder();
                 while ((currentLine = reader.readLine()) != null) {
                     String[] temp = currentLine.split(",");
                     String unm = temp[0];
                     if (unm.equals(user.getUsername())) {
-                        userExists = true;
-                        break;
+                        fileContent.append(user).append("\n");
+                    } else {
+                        fileContent.append(currentLine).append("\n");
                     }
                 }
-            } catch (FileNotFoundException e) {
-                // handle file not found exception
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(USER_PROFILE_PATH), StandardCharsets.UTF_8))) {
+                    writer.write(fileContent.toString());
+                }
+            } catch (IOException e) {
+                // handle error updating user
                 log.severe("ERROR SAVING LOG RECORD: " + e.getMessage());
                 return false;
             }
-    
-            // If exists update, and write it back to the file
-            if(userExists){
-                try (BufferedReader reader = new BufferedReader(new FileReader(USER_PROFILE_PATH))) {
-                    String currentLine;
-                    StringBuilder fileContent = new StringBuilder();
-                    while ((currentLine = reader.readLine()) != null) {
-                        String[] temp = currentLine.split(",");
-                        String unm = temp[0];
-                        if (unm.equals(user.getUsername())) {
-                            fileContent.append(user.toString()).append("\\n");
-                        } else {
-                            fileContent.append(currentLine).append("\\n");
-                        }
-                    }
-                    writer.write(fileContent.toString());
-                } catch (IOException e) {
-                    // handle error updating user
-                    log.severe("ERROR SAVING LOG RECORD: " + e.getMessage());
-                    return false;
-                }
+        }
+        // If not exists, create new user
+        else {
+            try (Writer appendWriter = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(USER_PROFILE_PATH, true), StandardCharsets.UTF_8))) {
+                appendWriter.write(user + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            // If not exists, create new user
-            else {
-                writer.write(user.toString() + "\\n");
-            }
-        } catch (IOException e) {
-            // handle error writing to file
-            log.severe("ERROR SAVING LOG RECORD: " + e.getMessage());
-            return false;
         }
     
         // Delete the user after finish this operation
@@ -103,7 +88,7 @@ public class UserProfileDao extends StaticLogBase {
                     found = true;
                     continue;
                 }
-                fileContent.append(currentLine).append("\\n");
+                fileContent.append(currentLine).append("\n");
             }
             if (!found) {
                 return false;
