@@ -1,4 +1,7 @@
-package drivers;
+package drivers.impl;
+import drivers.DisplayController;
+import drivers.KeypadController;
+import drivers.TimeKeeper;
 import drivers.enums.Key;
 import gui.enums.StateDisplayType;
 import javafx.scene.paint.Color;
@@ -14,14 +17,14 @@ public class KeypadControllerImpl implements KeypadController, TimeKeeper {
 
     private List<Key> inputBuffer = new ArrayList<>();
     private SafeController safeController;
-    private DisplayControllerInt displayController;
+    private DisplayController displayController;
     //private InputType inputType;
     private int[] expectedInputLength = {4,4};
     private boolean password;
     private Timer timer;
     private Executor executor;
 
-    public KeypadControllerImpl(SafeController safeController, DisplayControllerInt displayController){
+    public KeypadControllerImpl(SafeController safeController, DisplayController displayController){
         this.safeController = safeController;
         this.displayController = displayController;
         this.executor = Executors.newSingleThreadExecutor();

@@ -1,7 +1,7 @@
 package safe;
 
 import drivers.KeypadController;
-import drivers.LockController;
+import drivers.impl.LockController;
 import drivers.UsbDriver;
 import safe.enums.State;
 

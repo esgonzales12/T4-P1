@@ -1,16 +1,17 @@
-package drivers;
+package drivers.impl;
 
+import drivers.DisplayController;
 import gui.LedDisplay;
 import gui.StateDisplay;
 import gui.enums.StateDisplayType;
 import javafx.scene.paint.Color;
 
-public class DispController implements DisplayControllerInt {
+public class DisplayControllerImpl implements DisplayController {
 
     private LedDisplay ledDisplay;
     private StateDisplay stateDisplay;
     private String input, prompt;
-    public DispController(LedDisplay ledDisplay, StateDisplay stateDisplay) {
+    public DisplayControllerImpl(LedDisplay ledDisplay, StateDisplay stateDisplay) {
         this.ledDisplay = ledDisplay;
         this.stateDisplay = stateDisplay;
     }

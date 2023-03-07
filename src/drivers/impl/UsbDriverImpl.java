@@ -1,5 +1,6 @@
-package drivers;
+package drivers.impl;
 
+import drivers.UsbDriver;
 import log.StaticLogBase;
 import safe.SafeController;
 import safe.enums.State;

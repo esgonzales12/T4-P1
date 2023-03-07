@@ -3,6 +3,7 @@ package safe;
 import administrator.Administrator;
 import dao.domain.*;
 import drivers.*;
+import drivers.impl.LockController;
 import gui.enums.StateDisplayType;
 import javafx.scene.paint.Color;
 import safe.enums.State;
@@ -13,7 +14,7 @@ import java.util.List;
 public class SafeControllerImpl implements SafeController {
     private LockController lockCont;
     private final Administrator admin;
-    private final DisplayControllerInt dispController;
+    private final DisplayController dispController;
     private static UsbDriver usb;
     private static KeypadController keypadCont;
     private State currState = State.LOCKED;
@@ -24,7 +25,7 @@ public class SafeControllerImpl implements SafeController {
     private String requestedOperation;
     private Authorization authorized = Authorization.UNAUTHORIZED;
 
-    public SafeControllerImpl(Administrator administrator, DisplayControllerInt displayController){
+    public SafeControllerImpl(Administrator administrator, DisplayController displayController){
         admin = administrator;
         dispController = displayController;
     }

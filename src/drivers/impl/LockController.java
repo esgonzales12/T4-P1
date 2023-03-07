@@ -1,4 +1,4 @@
-package drivers;
+package drivers.impl;
 
 import gui.LockActuator;
 import safe.SafeController;

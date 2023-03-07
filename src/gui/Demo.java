@@ -3,15 +3,14 @@ package gui;
 import administrator.Administrator;
 import administrator.AdministratorImpl;
 import drivers.*;
-import gui.enums.StateDisplayType;
-import gui.impl.LedDisplayImpl;
-import gui.impl.LockActuatorImpl;
+import drivers.impl.DisplayControllerImpl;
+import drivers.impl.KeypadControllerImpl;
+import drivers.impl.LockController;
+import drivers.impl.UsbDriverImpl;
 import gui.impl.SafeImpl;
-import gui.impl.StateDisplayImpl;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import safe.SafeController;
 import safe.SafeControllerImpl;
@@ -23,7 +22,7 @@ public class Demo extends Application {
         final double windowHeight = 850;
 
         Safe safe = new SafeImpl(windowWidth, windowHeight);
-        DisplayControllerInt displayController = new DispController(safe.getStateDisplay(), safe.getLedDisplay());
+        DisplayController displayController = new DisplayControllerImpl(safe.getStateDisplay(), safe.getLedDisplay());
         Administrator admin = new AdministratorImpl();
         SafeController safeController = new SafeControllerImpl(admin,displayController);
         KeypadController keypadController = new KeypadControllerImpl(safeController,displayController);
