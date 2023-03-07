@@ -9,7 +9,7 @@ public class DispController implements DisplayControllerInt {
 
     private LedDisplay ledDisplay;
     private StateDisplay stateDisplay;
-
+    private String input, prompt;
     public DispController(LedDisplay ledDisplay, StateDisplay stateDisplay) {
         this.ledDisplay = ledDisplay;
         this.stateDisplay = stateDisplay;
@@ -34,11 +34,14 @@ public class DispController implements DisplayControllerInt {
 
     @Override
     public void displayInput(String input) {
-        ledDisplay.setDisplayText("Input:", input);
+        this.input = input;
+        ledDisplay.setDisplayText(prompt, input);
     }
 
     @Override
     public void displayPrompt(String prompt) {
-        ledDisplay.setDisplayText("Prompt:", prompt);
+        this.prompt = prompt;
+        ledDisplay.setDisplayText(prompt, input);
     }
 }
+

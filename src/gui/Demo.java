@@ -19,7 +19,9 @@ public class Demo extends Application {
         final double windowHeight = 850;
 
 
-
+        LedDisplay ledDisplay = new LedDisplayImpl(100,100);
+        StateDisplay stateDisplay = new StateDisplayImpl(100,100);
+        DisplayControllerInt displayController = new DispController(ledDisplay, stateDisplay);
 
         Safe safe = new SafeImpl(windowWidth, windowHeight);
         SafeController safeController = new SafeControllerImpl();

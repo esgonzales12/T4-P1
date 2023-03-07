@@ -8,10 +8,10 @@ public class KeypadControllerImpl implements KeypadController {
 
     private List<Key> inputBuffer = new ArrayList<>();
     private SafeController safeController;
-    private DisplayController displayController;
+    private DispController displayController;
     private InputType inputType;
 
-    public KeypadControllerImpl(SafeController safeController, DisplayController displayController){
+    public KeypadControllerImpl(SafeController safeController, DispController displayController){
         this.safeController = safeController;
         this.displayController = displayController;
     }
