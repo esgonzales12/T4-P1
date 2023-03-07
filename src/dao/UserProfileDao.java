@@ -5,6 +5,7 @@ import log.StaticLogBase;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class UserProfileDao extends StaticLogBase {
     private static final String USER_PROFILE_PATH = "src/dao/data/userProfiles.txt";
@@ -54,7 +55,7 @@ public class UserProfileDao extends StaticLogBase {
                 }
             } catch (IOException e) {
                 // handle error updating user
-                log.severe("ERROR SAVING LOG RECORD: " + e.getMessage());
+                log.severe("ERROR UPDATING USER: " + e.getMessage());
                 return false;
             }
         }
@@ -64,12 +65,14 @@ public class UserProfileDao extends StaticLogBase {
                     new FileOutputStream(USER_PROFILE_PATH, true), StandardCharsets.UTF_8))) {
                 appendWriter.write(user + "\n");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.severe("ERROR ADDING NEW USER: " + e.getMessage());
+                return false;
             }
         }
-    
-        // Delete the user after finish this operation
-        return delete(user.getUsername());
+        UserProfile saved = getUser(user.getUsername());
+        return Objects.nonNull(saved)
+                && saved.getUsername().equals(user.getUsername())
+                && saved.getPassword().equals(user.getPassword());
     }
     
     public boolean delete(String username) {
@@ -91,6 +94,7 @@ public class UserProfileDao extends StaticLogBase {
                 fileContent.append(currentLine).append("\n");
             }
             if (!found) {
+                log.info("NO USER FOUND WITH USERNAME: " + username);
                 return false;
             }
             try (Writer writer =

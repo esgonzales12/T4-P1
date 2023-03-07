@@ -22,7 +22,7 @@ import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-public class AdministratorImpl  extends StaticLogBase implements Administrator {
+public class AdministratorImpl extends StaticLogBase implements Administrator {
 
     private static final String ALGORITHM = "AES";
     private static final Map<Authority, List<Operation>> ALLOWED_OPERATIONS = Map.ofEntries(
@@ -68,7 +68,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
                             : "ATTEMPTED TO CREATE SECOND ROOT USER");
                     return false;
                 }
-                log.info("CREATING NEW USER");
+                log.info("CREATING NEW USER: " + username);
                 UserProfile userProfile = new UserProfile(
                         requireNonNull(encrypt(username)),
                         requireNonNull(hash(password)),
@@ -77,7 +77,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             }
 
             // changing password
-            log.info("CHANGING USER PASSWORD");
+            log.info("CHANGING USER PASSWORD FOR USER: " + username);
 
             return userProfileDao.save(new UserProfile(
                     existing.getUsername(),
@@ -99,6 +99,10 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
     @Override
     public boolean deleteUser(String username) {
         try {
+            if (isNull(username)) {
+                log.info("USERNAME REQUIRED FOR DELETE");
+                return false;
+            }
             if (isNull(encryptionKey)) encryptionKey = securityDao.getEncryptionKey();
 
             String rootAuthority = requireNonNull(encrypt(ROOT.getValue()));
@@ -108,6 +112,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
                 log.info("ATTEMPTED TO DELETE ROOT USER");
                 return false;
             }
+            log.info("DELETING USER: " + username);
             return userProfileDao.delete(requireNonNull(encrypt(username)));
         } catch (NullPointerException nullPointerException) {
             // handles null cases for encrypt, decrypt, hash
@@ -156,7 +161,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
             }
 
             if (isNull(authority) || !ALLOWED_OPERATIONS.get(authority).contains(operation)) {
-                log.info(format("USER %s WITH AUTHORITY %s CANNOT PERFORM OPERATION %s", user.getUsername(), authority, operation));
+                log.info(format("USER %s WITH AUTHORITY '%s' CANNOT PERFORM OPERATION '%s'", user.getUsername(), authority, operation));
                 return Authorization.UNAUTHORIZED;
             }
 
@@ -167,6 +172,7 @@ public class AdministratorImpl  extends StaticLogBase implements Administrator {
                     .build());
 
             if (logged) {
+                log.info(format("USER %S WITH AUTHORITY '%s' AUTHORIZED FOR OPERATION'%s'", user.getUsername(), authority, operation));
                 userPrincipal = user;
                 return Authorization.AUTHORIZED;
             }

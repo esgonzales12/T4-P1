@@ -1,5 +1,7 @@
 package dao.domain;
 
+import java.util.Objects;
+
 public class UserProfile {
     private final String username;
     private final String password;
@@ -21,6 +23,19 @@ public class UserProfile {
 
     public String getAuthority() {
         return authority;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserProfile that = (UserProfile) o;
+        return Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(authority, that.authority);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, authority);
     }
 
     @Override
