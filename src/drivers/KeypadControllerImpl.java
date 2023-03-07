@@ -54,6 +54,7 @@ public class KeypadControllerImpl implements KeypadController {
             inputBuffer.clear();
             inputBuffer.add(key);
             handleMetaKey(inputBuffer);
+            inputBuffer.clear();
 
         } else {
             //inputType = InputType.REGULAR;

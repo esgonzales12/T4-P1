@@ -29,10 +29,10 @@ public class Demo extends Application {
         KeypadController keypadController = new KeypadControllerImpl(safeController,displayController);
         safe.setKeypadController(keypadController);
         LockController lockController = new LockController(safe.getLockActuator(),safeController);
-        UsbDriver usbDriver = new USB.SafeUsbDriver();
-        USB usb = new USB(usbDriver,safeController);
+        UsbDriver usb = new UsbDriverImpl(safeController);
+        safe.setUsbDriver(usb);
         safeController.setKeypadCont(keypadController);
-        safeController.setUsb(usbDriver);
+        safeController.setUsb(usb);
         safeController.setLockCont(lockController);
         safe.setActuatorSafeController(safeController);
         primaryStage.setScene(new Scene((StackPane) safe, windowWidth, windowHeight));

@@ -2,14 +2,12 @@ package safe;
 
 import administrator.Administrator;
 import dao.domain.*;
-import drivers.DisplayControllerInt;
-import drivers.KeypadController;
-import drivers.LockController;
-import drivers.UsbDriver;
+import drivers.*;
 import gui.enums.StateDisplayType;
 import javafx.scene.paint.Color;
 import safe.enums.State;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SafeControllerImpl implements SafeController {
@@ -24,7 +22,7 @@ public class SafeControllerImpl implements SafeController {
     private UserProfile currUser;
     private String newPassword;
     private String requestedOperation;
-    private boolean authorized = false;
+    private Authorization authorized = Authorization.UNAUTHORIZED;
 
     public SafeControllerImpl(Administrator administrator, DisplayControllerInt displayController){
         admin = administrator;
@@ -75,11 +73,11 @@ public class SafeControllerImpl implements SafeController {
                 password = input;
                 justInitialized = true;
                 currUser = new UserProfile(userName,password,"USER");
+                dispController.clear();
                 keypadCont.setExpectedInputLength(4,4,false);
             }
         }
         if(justInitialized){
-            Authorization authorized;
             switch (currState){
                 case ADMIN:
                     authorized = admin.authorizeUser(currUser, Operation.USER_MANAGEMENT);
@@ -100,23 +98,23 @@ public class SafeControllerImpl implements SafeController {
                         dispController.signal(Color.RED, StateDisplayType.FLASH);
                     } else {
                         keypadCont.setExpectedInputLength(8,12,true);
-                        dispController.displayPrompt("Input New Password Twice");
+                        dispController.displayPrompt("Input New Password");
                     }
                     break;
                 case EXPORT:
-                    System.out.println("export");
                     authorized = admin.authorizeUser(currUser, Operation.EXPORT_LOGS);
                     if(!(authorized==Authorization.AUTHORIZED)){
                         wipeUser();
                         //Flash red LED
                         dispController.signal(Color.RED, StateDisplayType.FLASH);
+                        currState = State.LOCKED;
                     } else {
                         //flash green LED
                         dispController.signal(Color.GREEN, StateDisplayType.FLASH);
                         //export logs
                         usb.createFile("Safe Log Export");
                         List<LogRecord> logs = admin.getLogs();
-                        List<String> stringLogs = null;
+                        List<String> stringLogs = new ArrayList<>();
                         for (LogRecord logrecord: logs) {
                             stringLogs.add(logrecord.toString());
                         }
@@ -141,32 +139,47 @@ public class SafeControllerImpl implements SafeController {
                     }
             }
         } else {
-            if (authorized) {
+            if ((authorized==Authorization.AUTHORIZED)) {
                 if(currState == State.ADMIN){
                     if(requestedOperation == null){
                         requestedOperation = input;
-                        if (requestedOperation.equals("C") || requestedOperation.equals("D")){
+                        if (requestedOperation.equals("C")){
                             keypadCont.setExpectedInputLength(4,4,false);
-                        } else {
+                            dispController.displayPrompt("New Username");
+                        } else if (requestedOperation.equals("D")){
+                            keypadCont.setExpectedInputLength(4,4,false);
+                            dispController.displayPrompt("Username to Delete");
+                        }else {
                             //flash red light
                             dispController.signal(Color.RED, StateDisplayType.FLASH);
                             requestedOperation = null;
                         }
                     } else {
                         if (requestedOperation.equals("C")){
+                            System.out.println("created");
                             admin.saveUser(input,"12345678", Authority.USER);
                             dispController.signal(Color.GREEN, StateDisplayType.FLASH);
+                            wipeUser();
+                            currState = State.LOCKED;
                         } else if (requestedOperation.equals("D")) {
+                            System.out.println("deleted");
                             admin.deleteUser(input);
                             dispController.signal(Color.GREEN, StateDisplayType.FLASH);
+                            wipeUser();
+                            currState = State.LOCKED;
                         }
                     }
                 } else if(currState == State.CHANGEPWD){
+                    System.out.println("reached change password");
                     if (newPassword == null){
                         newPassword = input;
+                        System.out.println("new password filled");
                     } else if(newPassword.equals(input)) {
+                        System.out.println("new password confirmed");
                         admin.saveUser(userName,newPassword,Authority.USER);
                         dispController.signal(Color.GREEN, StateDisplayType.FLASH);
+                        wipeUser();
+                        currState = State.LOCKED;
                     } else {
                         newPassword = null;
                         //flash red light
@@ -179,13 +192,14 @@ public class SafeControllerImpl implements SafeController {
     }
 
     private void wipeUser(){
+        dispController.clear();
         userName = null;
         password = null;
         newPassword = null;
         currUser = null;
-        authorized = false;
+        authorized = Authorization.UNAUTHORIZED;
         requestedOperation = null;
         keypadCont.setExpectedInputLength(4,4,false);
-        dispController.clear();
+
     }
 }

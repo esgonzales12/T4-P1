@@ -24,6 +24,8 @@ public class DispController implements DisplayControllerInt {
     public void clear() {
         stateDisplay.off();
         ledDisplay.clearDisplayText();
+        prompt = null;
+        input = null;
     }
 
     @Override
