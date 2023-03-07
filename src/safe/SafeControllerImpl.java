@@ -104,6 +104,7 @@ public class SafeControllerImpl implements SafeController {
                     }
                     break;
                 case EXPORT:
+                    System.out.println("export");
                     authorized = admin.authorizeUser(currUser, Operation.EXPORT_LOGS);
                     if(!(authorized==Authorization.AUTHORIZED)){
                         wipeUser();

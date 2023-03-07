@@ -22,22 +22,19 @@ public class Demo extends Application {
         final double windowWidth = 1200;
         final double windowHeight = 850;
 
-
-        LedDisplay ledDisplay = new LedDisplayImpl(100,100);
-        StateDisplay stateDisplay = new StateDisplayImpl(100,100);
-        DisplayControllerInt displayController = new DispController(ledDisplay, stateDisplay);
-        Administrator admin = new AdministratorImpl();
         Safe safe = new SafeImpl(windowWidth, windowHeight);
+        DisplayControllerInt displayController = new DispController(safe.getStateDisplay(), safe.getLedDisplay());
+        Administrator admin = new AdministratorImpl();
         SafeController safeController = new SafeControllerImpl(admin,displayController);
         KeypadController keypadController = new KeypadControllerImpl(safeController,displayController);
         safe.setKeypadController(keypadController);
-        LockActuator actuator = new LockActuatorImpl();
-        LockController lockController = new LockController(actuator,safeController);
+        LockController lockController = new LockController(safe.getLockActuator(),safeController);
         UsbDriver usbDriver = new USB.SafeUsbDriver();
         USB usb = new USB(usbDriver,safeController);
         safeController.setKeypadCont(keypadController);
         safeController.setUsb(usbDriver);
         safeController.setLockCont(lockController);
+        safe.setActuatorSafeController(safeController);
         primaryStage.setScene(new Scene((StackPane) safe, windowWidth, windowHeight));
         primaryStage.setResizable(false);
         primaryStage.show();

@@ -23,13 +23,11 @@ public class LockActuatorImpl extends StaticLogBase implements LockActuator {
     }
 
     public synchronized void disengage() {
-        log.info("DISENGAGED");
         engaged.set(false);
         notifyAll();
     }
 
     protected void engage() {
-        log.info("ENGAGED");
         engaged.set(true);
         safeCont.handleStateChangeRequest(State.LOCKED);
     }

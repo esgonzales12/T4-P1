@@ -14,6 +14,8 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import safe.SafeController;
+import safe.SafeControllerImpl;
 
 import static gui.util.SafeUtil.*;
 
@@ -47,7 +49,10 @@ public class SafeImpl extends StackPane implements Safe {
     public void setKeypadController(KeypadController keypadController) {
         safeAccessModule.setKeypadController(keypadController);
     }
-
+    @Override
+    public void setActuatorSafeController(SafeController safeController){
+        actuator.setSafeCont(safeController);
+    }
     @Override
     public LedDisplay getStateDisplay() {
         return safeAccessModule.getLedDisplay();
