@@ -156,13 +156,12 @@ public class SafeControllerImpl implements SafeController {
                         }
                     } else {
                         if (requestedOperation.equals("C")){
-                            System.out.println("created");
                             admin.saveUser(input,"12345678", Authority.USER);
                             dispController.signal(Color.GREEN, StateDisplayType.FLASH);
                             wipeUser();
                             currState = State.LOCKED;
                         } else if (requestedOperation.equals("D")) {
-                            System.out.println("deleted");
+
                             admin.deleteUser(input);
                             dispController.signal(Color.GREEN, StateDisplayType.FLASH);
                             wipeUser();
@@ -170,12 +169,9 @@ public class SafeControllerImpl implements SafeController {
                         }
                     }
                 } else if(currState == State.CHANGEPWD){
-                    System.out.println("reached change password");
                     if (newPassword == null){
                         newPassword = input;
-                        System.out.println("new password filled");
                     } else if(newPassword.equals(input)) {
-                        System.out.println("new password confirmed");
                         admin.saveUser(userName,newPassword,Authority.USER);
                         dispController.signal(Color.GREEN, StateDisplayType.FLASH);
                         wipeUser();
