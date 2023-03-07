@@ -4,6 +4,7 @@ import gui.StateDisplay;
 import gui.enums.StateDisplayType;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.scene.effect.Glow;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -47,12 +48,14 @@ public class StateDisplayImpl extends Rectangle implements StateDisplay {
 
     @Override
     public void off() {
-        flashAnimation.stop();
-        blinkAnimation.stop();
-        solidAnimation.stop();
-        setOpacity(1.0);
-        setFill(LIGHT_OFF_COLOR);
-        glow.setLevel(LIGHT_OFF_LEVEL);
+        Platform.runLater(() -> {
+            flashAnimation.stop();
+            blinkAnimation.stop();
+            solidAnimation.stop();
+            setOpacity(1.0);
+            setFill(LIGHT_OFF_COLOR);
+            glow.setLevel(LIGHT_OFF_LEVEL);
+        });
     }
 
     private void initAnimations() {

@@ -37,12 +37,14 @@ public class DispController implements DisplayControllerInt {
     @Override
     public void displayInput(String input) {
         this.input = input;
+        ledDisplay.backlightOn();
         ledDisplay.setDisplayText(prompt, input);
     }
 
     @Override
     public void displayPrompt(String prompt) {
         this.prompt = prompt;
+        ledDisplay.backlightOn();
         ledDisplay.setDisplayText(prompt, input);
     }
 }

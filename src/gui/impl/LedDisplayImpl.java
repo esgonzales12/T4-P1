@@ -3,6 +3,7 @@ package gui.impl;
 import gui.LedDisplay;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Glow;
 import javafx.scene.layout.StackPane;
@@ -39,34 +40,40 @@ public class LedDisplayImpl extends StackPane implements LedDisplay {
 
     @Override
     public void backlightOn() {
-        glow.setLevel(DISPLAY_ON_LEVEL);
-        ledDisplay.setFill(DISPLAY_ON_COLOR);
-        fadeAnimation.play();
+        Platform.runLater(() -> {
+            glow.setLevel(DISPLAY_ON_LEVEL);
+            ledDisplay.setFill(DISPLAY_ON_COLOR);
+            fadeAnimation.play();
+        });
     }
 
     @Override
     public void backlightOff() {
-        glow.setLevel(DISPLAY_OFF_LEVEL);
-        ledDisplay.setFill(DISPLAY_OFF_COLOR);
-        fadeAnimation.stop();
+        Platform.runLater(() -> {
+            glow.setLevel(DISPLAY_OFF_LEVEL);
+            ledDisplay.setFill(DISPLAY_OFF_COLOR);
+            fadeAnimation.stop();
+        });
     }
 
     @Override
     public void setDisplayText(String prompt, String input) {
-        if (isNull(prompt) || prompt.isEmpty()) {
-            displayText.setText(input);
-            return;
-        }
-        displayText.setText(String.format(
-                """
-                        %s
-                        %s
-                        """, prompt, input));
+        Platform.runLater(() -> {
+            if (isNull(prompt) || prompt.isEmpty()) {
+                displayText.setText(input);
+                return;
+            }
+            displayText.setText(String.format(
+                    """
+                            %s
+                            %s
+                            """, prompt, input));
+        });
     }
 
     @Override
     public void clearDisplayText() {
-        displayText.setText("");
+        Platform.runLater(() -> displayText.setText(""));
     }
 
 }

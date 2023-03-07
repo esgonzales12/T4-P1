@@ -7,7 +7,10 @@ import safe.enums.State;
 
 import java.util.ArrayList;
 import java.util.List;
-public class KeypadControllerImpl implements KeypadController {
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+public class KeypadControllerImpl implements KeypadController, TimeKeeper {
 
     private List<Key> inputBuffer = new ArrayList<>();
     private SafeController safeController;
@@ -15,14 +18,24 @@ public class KeypadControllerImpl implements KeypadController {
     //private InputType inputType;
     private int[] expectedInputLength = {4,4};
     private boolean password;
+    private Timer timer;
+    private Executor executor;
 
     public KeypadControllerImpl(SafeController safeController, DisplayControllerInt displayController){
         this.safeController = safeController;
         this.displayController = displayController;
+        this.executor = Executors.newSingleThreadExecutor();
+        this.timer = new Timer();
+        this.timer.setTimeKeeper(this);
+        this.executor.execute(timer);
     }
 
     public KeypadControllerImpl() {
 
+    }
+
+    public void off() {
+        timer.end();
     }
 
     /*If the user hits ENTER on the keypad then the input buffer
@@ -31,6 +44,7 @@ public class KeypadControllerImpl implements KeypadController {
      */
     @Override
     public void receiveKey(Key key) {
+        timer.startTimer();
         if (key == Key.ENTER) {
             if (inputBuffer.size() >= expectedInputLength[0] && inputBuffer.size() <= expectedInputLength[1]) {
                 handleInputKey(inputBuffer);
@@ -111,6 +125,14 @@ public class KeypadControllerImpl implements KeypadController {
         String input = stringBuilder.toString();
         return input;
     }
+
+    @Override
+    public void notifyTimeout() {
+        inputBuffer.clear();
+        displayController.clear();
+        displayController.sleep();
+    }
+
     private enum InputType {
         REGULAR, META
     }
