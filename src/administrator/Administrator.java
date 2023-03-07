@@ -1,16 +1,14 @@
 package administrator;
 
-import dao.domain.Authority;
-import dao.domain.LogRecord;
-import dao.domain.Operation;
-import dao.domain.UserProfile;
+import dao.domain.*;
 
 import java.util.List;
 
 public interface Administrator {
 
-    void saveUser(String username, String password, Authority authority);
-    void deleteUser(String username);
-    void authorizeUser(UserProfile user, Operation operation);
+    boolean saveUser(String username, String password, Authority authority);
+    boolean deleteUser(String username);
+    Authorization authorizeUser(UserProfile user, Operation operation);
     List<LogRecord> getLogs();
+    UserProfile getUserPrincipal();
 }
