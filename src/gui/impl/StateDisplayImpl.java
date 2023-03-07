@@ -34,16 +34,18 @@ public class StateDisplayImpl extends Rectangle implements StateDisplay {
 
     @Override
     public void display(Color color, StateDisplayType type) {
-        flashAnimation.stop();
-        blinkAnimation.stop();
-        solidAnimation.stop();
-        glow.setLevel(LIGHT_ON_LEVEL);
-        setFill(color);
-        switch (type) {
-            case FLASH -> flashAnimation.play();
-            case BLINKING -> blinkAnimation.play();
-            case SOLID -> solidAnimation.play();
-        }
+        Platform.runLater(() -> {
+            flashAnimation.stop();
+            blinkAnimation.stop();
+            solidAnimation.stop();
+            glow.setLevel(LIGHT_ON_LEVEL);
+            setFill(color);
+            switch (type) {
+                case FLASH -> flashAnimation.play();
+                case BLINKING -> blinkAnimation.play();
+                case SOLID -> solidAnimation.play();
+            }
+        });
     }
 
     @Override

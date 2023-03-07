@@ -46,7 +46,6 @@ public class Timer extends StaticLogBase implements Runnable{
                             if (timeKeeper != null) {
                                 timeKeeper.notifyTimeout();
                             }
-                            countingDown.set(false);
                         }
                     } catch (InterruptedException e) {
                         log.info("INTERRUPT ON COUNTDOWN");

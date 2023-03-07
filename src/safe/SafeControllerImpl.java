@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SafeControllerImpl implements SafeController {
-    private static Administrator admin;
-    private static LockController lockCont;
-    private static DisplayControllerInt dispController;
+    private LockController lockCont;
+    private final Administrator admin;
+    private final DisplayControllerInt dispController;
     private static UsbDriver usb;
     private static KeypadController keypadCont;
     private State currState = State.LOCKED;
